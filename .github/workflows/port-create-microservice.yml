@@ -47,27 +47,3 @@ jobs:
             --description "Microservicio: ${{ steps.ctx.outputs.service_name }}"
           echo "repo_url=https://github.com/${{ github.repository_owner }}/${{ steps.ctx.outputs.service_name }}" >> $GITHUB_OUTPUT
 
-      - name: Notificar exito a Port
-        if: success()
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId:     ${{ env.CLIENT_ID }}
-          clientSecret: ${{ env.CLIENT_SECRET }}
-          baseUrl:      https://api.getport.io
-          operation:    PATCH_RUN
-          runId:        ${{ steps.ctx.outputs.run_id }}
-          logMessage:   "Repositorio creado: ${{ steps.create_repo.outputs.repo_url }}"
-          status:       "SUCCESS"
-          link:         '["${{ steps.create_repo.outputs.repo_url }}"]'
-
-      - name: Notificar falla a Port
-        if: failure()
-        uses: port-labs/port-github-action@v1
-        with:
-          clientId:     ${{ secrets.PORT_CLIENT_ID }}
-          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
-          baseUrl:      https://api.getport.io
-          operation:    PATCH_RUN
-          runId:        ${{ steps.ctx.outputs.run_id }}
-          logMessage:   "Fallo al crear el repositorio. Revisa los logs."
-          status:       "FAILURE"
