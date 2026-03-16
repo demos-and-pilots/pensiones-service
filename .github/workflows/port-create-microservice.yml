@@ -1,36 +1,69 @@
 # .github/workflows/port-create-microservice.yml
-name: Port - Crear nuevo microservicio
+name: Port - Crear nuevo microservicio Spring Boot
+
 on:
   workflow_dispatch:
     inputs:
       port_context:
         required: true
-        description: "Contexto enviado por Port (JSON)"
+        description: "Payload JSON de Port"
         type: string
+
 jobs:
   create-microservice:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Parsear contexto de Port
+      - name: Parsear inputs
         id: ctx
         run: |
-          echo "nombre=${{ fromJson(inputs.port_context).inputs.serviceName }}" >> $GITHUB_OUTPUT
-          echo "puerto=${{ fromJson(inputs.port_context).inputs.port }}"        >> $GITHUB_OUTPUT
-          echo "owner=${{ fromJson(inputs.port_context).inputs.ownerTeam }}"   >> $GITHUB_OUTPUT
-      - name: Checkout template
-        uses: actions/checkout@v4
-      - name: Crear repositorio desde template
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          gh repo create ${{ steps.ctx.outputs.nombre }} \
-            --public --clone --template ${{ github.repository }}
-      - name: Notificar exito a Port
+          echo "service_name=$(echo '${{ inputs.port_context }}' | jq -r '.inputs.serviceName')" >> $GITHUB_OUTPUT
+          echo "run_id=$(echo '${{ inputs.port_context }}' | jq -r '.runId')"                    >> $GITHUB_OUTPUT
+          echo "owner_team=$(echo '${{ inputs.port_context }}' | jq -r '.inputs.ownerTeam')"     >> $GITHUB_OUTPUT
+
+      - name: Log inicio a Port
         uses: port-labs/port-github-action@v1
         with:
           clientId:     ${{ secrets.PORT_CLIENT_ID }}
           clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl:      https://api.getport.io
           operation:    PATCH_RUN
-          runId:        ${{ fromJson(inputs.port_context).runId }}
-          logMessage:   "Microservicio ${{ steps.ctx.outputs.nombre }} creado exitosamente"
+          runId:        ${{ steps.ctx.outputs.run_id }}
+          logMessage:   "Creando repositorio ${{ steps.ctx.outputs.service_name }}..."
+          status:       "IN_PROGRESS"
+
+      - name: Crear repositorio desde template
+        id: create_repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh repo create ${{ github.repository_owner }}/${{ steps.ctx.outputs.service_name }} \
+            --public \
+            --template ${{ github.repository }} \
+            --description "Microservicio: ${{ steps.ctx.outputs.service_name }}"
+          echo "repo_url=https://github.com/${{ github.repository_owner }}/${{ steps.ctx.outputs.service_name }}" >> $GITHUB_OUTPUT
+
+      - name: Notificar exito a Port
+        if: success()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId:     ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl:      https://api.getport.io
+          operation:    PATCH_RUN
+          runId:        ${{ steps.ctx.outputs.run_id }}
+          logMessage:   "Repositorio creado: ${{ steps.create_repo.outputs.repo_url }}"
           status:       "SUCCESS"
+          link:         '["${{ steps.create_repo.outputs.repo_url }}"]'
+
+      - name: Notificar falla a Port
+        if: failure()
+        uses: port-labs/port-github-action@v1
+        with:
+          clientId:     ${{ secrets.PORT_CLIENT_ID }}
+          clientSecret: ${{ secrets.PORT_CLIENT_SECRET }}
+          baseUrl:      https://api.getport.io
+          operation:    PATCH_RUN
+          runId:        ${{ steps.ctx.outputs.run_id }}
+          logMessage:   "Fallo al crear el repositorio. Revisa los logs."
+          status:       "FAILURE"
