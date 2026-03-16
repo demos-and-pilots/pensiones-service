@@ -4,8 +4,8 @@ name: Trigger auto deployment for pensiones-service
 on:
   # Automatically trigger it when detected changes in repo
   push:
-    branches: 
-      [ master ]
+    branches:
+      [ main ]
     paths:
     - '**'
     - '.github/workflows/pensiones-service-AutoDeployTrigger-e3de0426-5a1c-481a-b51c-102a92b6d5a6.yml'

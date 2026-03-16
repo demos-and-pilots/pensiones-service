@@ -1,0 +1,59 @@
+{
+  "identifier": "create_spring_boot_microservice",
+  "title": "Nuevo microservicio Spring Boot",
+  "icon": "DefaultBlueprint",
+  "description": "Crea un repo desde el template de pensiones-service",
+  "trigger": {
+    "type": "self-service",
+    "operation": "CREATE",
+    "userInputs": {
+      "properties": {
+        "serviceName": {
+          "type": "string",
+          "title": "Nombre del servicio",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "port": {
+          "type": "number",
+          "title": "Puerto",
+          "default": 8080
+        },
+        "ownerTeam": {
+          "type": "string",
+          "title": "Equipo responsable"
+        },
+        "tier": {
+          "type": "string",
+          "title": "Tier",
+          "enum": [
+            "Tier 1 - Critical",
+            "Tier 2 - Standard",
+            "Tier 3 - Internal"
+          ],
+          "default": "Tier 2 - Standard"
+        }
+      },
+      "required": [
+        "serviceName",
+        "ownerTeam"
+      ]
+    }
+  },
+  "invocationMethod": {
+    "type": "INTEGRATION_ACTION",
+    "installationId": "github-port",
+    "integrationActionType": "dispatch_workflow",
+    "integrationActionExecutionProperties": {
+      "org": "omarnoriega",
+      "repo": "pensiones-service",
+      "workflow": "port-test.yml",
+      "workflowInputs": {
+        "port_context": {
+          "runId": "{{ .run.id }}",
+          "inputs": "{{ .inputs }}"
+        }
+      },
+      "reportWorkflowStatus": true
+    }
+  }
+}

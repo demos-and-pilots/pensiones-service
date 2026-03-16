@@ -21,7 +21,7 @@ jobs:
           echo "run_id=$(echo '${{ inputs.port_context }}' | jq -r '.runId')"                    >> $GITHUB_OUTPUT
           echo "owner_team=$(echo '${{ inputs.port_context }}' | jq -r '.inputs.ownerTeam')"     >> $GITHUB_OUTPUT
 
-      - name: Log inicio a Port
+      - name: Login Port
         uses: port-labs/port-github-action@v1
         with:
           clientId:     ${{ secrets.PORT_CLIENT_ID }}
@@ -30,7 +30,7 @@ jobs:
           operation:    PATCH_RUN
           runId:        ${{ steps.ctx.outputs.run_id }}
           logMessage:   "Creando repositorio ${{ steps.ctx.outputs.service_name }}..."
-          status:       "IN_PROGRESS"
+          status:       "SUCCESS"
 
       - name: Crear repositorio desde template
         id: create_repo
