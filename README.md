@@ -13,8 +13,9 @@ Consulta estadísticas de afiliación al **Sistema General de Pensiones de Colom
 mvn spring-boot:run
 
 # Swagger UI
-open http://localhost:8080/swagger-ui.html
+open http://localhost:8080/swagger-ui.html 
 ```
+### [Visita la API en Azure](https://pensiones-servicio.ashypond-100f37ca.westus2.azurecontainerapps.io/swagger-ui/index.html)
 
 No requiere base de datos ni configuración adicional. Los datos se cargan desde el CSV incluido al arrancar.
 
