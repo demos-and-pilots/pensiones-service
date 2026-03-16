@@ -1,0 +1,13 @@
+# .github/workflows/port-test.yml
+name: Port test trigger
+on:
+  workflow_dispatch:
+    inputs:
+      port_context:
+        required: true
+        type: string
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Port llegó correctamente"
