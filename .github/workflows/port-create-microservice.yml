@@ -9,10 +9,6 @@ on:
         description: "Payload JSON de Port"
         type: string
 
-env:
-  CLIENT_ID:     ${{ secrets.PORT_CLIENT_ID }}
-  CLIENT_SECRET: ${{ secrets.PORT_CLIENT_SECRET }}
-
 jobs:
   create-microservice:
     runs-on: ubuntu-latest
